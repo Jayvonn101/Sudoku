@@ -22,7 +22,7 @@ public class RandomNum {
         Random random = new Random();
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                grid[i][j] = random.nextInt(100); // Random number between 0 and 99
+                grid[i][j] = random.nextInt(row + 1); // Random number between 0 and 99
             }
         }
     }
