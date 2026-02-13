@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 
 public class SudokuGUI extends JFrame {
@@ -13,6 +14,7 @@ public class SudokuGUI extends JFrame {
     private JLabel statusLabel;
     private JLabel titleLabel;
     private Timer swingTimer;
+    private Timer glowTimer;
     private long startTime;
     private long elapsedTime;
     private boolean isRunning;
@@ -23,20 +25,32 @@ public class SudokuGUI extends JFrame {
     private static final int CELL_SIZE = 55;
     private static final String SAVE_DIR = "saves/";
     
-    // Neon color scheme
-    private static final Color BLACK_BG = new Color(5, 5, 8);
-    private static final Color DARK_BG = new Color(15, 15, 20);
-    private static final Color PANEL_BG = new Color(10, 10, 15);
+    // Enhanced neon color scheme
+    private static final Color BLACK_BG = new Color(0, 0, 5);
+    private static final Color DARK_BG = new Color(10, 10, 15);
+    private static final Color PANEL_BG = new Color(5, 5, 10);
     private static final Color NEON_CYAN = new Color(0, 255, 255);
+    private static final Color NEON_CYAN_DIM = new Color(0, 150, 150);
     private static final Color NEON_MAGENTA = new Color(255, 0, 255);
+    private static final Color NEON_MAGENTA_DIM = new Color(150, 0, 150);
     private static final Color NEON_GREEN = new Color(57, 255, 20);
+    private static final Color NEON_GREEN_DIM = new Color(30, 150, 10);
     private static final Color NEON_YELLOW = new Color(255, 255, 0);
+    private static final Color NEON_YELLOW_DIM = new Color(150, 150, 0);
     private static final Color NEON_PINK = new Color(255, 20, 147);
+    private static final Color NEON_PINK_DIM = new Color(150, 10, 80);
     private static final Color NEON_BLUE = new Color(0, 191, 255);
+    private static final Color NEON_BLUE_DIM = new Color(0, 100, 150);
     private static final Color NEON_ORANGE = new Color(255, 165, 0);
+    private static final Color NEON_ORANGE_DIM = new Color(150, 100, 0);
     private static final Color NEON_RED = new Color(255, 50, 50);
     private static final Color NEON_PURPLE = new Color(148, 0, 211);
-    private static final Color TEXT_COLOR = new Color(220, 220, 220);
+    private static final Color NEON_WHITE = new Color(255, 255, 255);
+    private static final Color TEXT_COLOR = new Color(200, 200, 200);
+    
+    // Glow intensity for animation
+    private float glowIntensity = 0.0f;
+    private boolean glowIncreasing = true;
     
     // Panels for card layout
     private JPanel mainPanel;
@@ -52,11 +66,10 @@ public class SudokuGUI extends JFrame {
         
         new File(SAVE_DIR).mkdirs();
         
-        // Set look and feel to ensure black background everywhere
-        setUndecorated(false);
         getContentPane().setBackground(BLACK_BG);
         
         initComponents();
+        startGlowAnimation();
         
         pack();
         setLocationRelativeTo(null);
@@ -78,12 +91,47 @@ public class SudokuGUI extends JFrame {
         
         add(mainPanel);
         
-        // Show menu first
         cardLayout.show(mainPanel, MENU_PANEL);
     }
     
+    private void startGlowAnimation() {
+        glowTimer = new Timer(50, e -> {
+            if (glowIncreasing) {
+                glowIntensity += 0.05f;
+                if (glowIntensity >= 1.0f) {
+                    glowIntensity = 1.0f;
+                    glowIncreasing = false;
+                }
+            } else {
+                glowIntensity -= 0.05f;
+                if (glowIntensity <= 0.3f) {
+                    glowIntensity = 0.3f;
+                    glowIncreasing = true;
+                }
+            }
+            repaint();
+        });
+        glowTimer.start();
+    }
+    
     private JPanel createMainMenuPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Draw glowing background grid
+                g2d.setColor(new Color(0, 40, 40, 30));
+                for (int i = 0; i < getWidth(); i += 40) {
+                    g2d.drawLine(i, 0, i, getHeight());
+                }
+                for (int i = 0; i < getHeight(); i += 40) {
+                    g2d.drawLine(0, i, getWidth(), i);
+                }
+            }
+        };
         panel.setBackground(BLACK_BG);
         panel.setBorder(BorderFactory.createEmptyBorder(50, 100, 50, 100));
         
@@ -92,29 +140,84 @@ public class SudokuGUI extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(20, 0, 20, 0);
         
-        // Title
-        JLabel title = new JLabel("⚡ NEON SUDOKU ⚡");
-        title.setFont(new Font("Consolas", Font.BOLD, 48));
+        // Animated glowing title
+        JLabel title = new JLabel("⚡ NEON SUDOKU ⚡") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                
+                // Draw glow effect
+                int glowSize = (int) (10 * glowIntensity);
+                for (int i = glowSize; i > 0; i -= 2) {
+                    float alpha = 0.1f * (1 - (float) i / glowSize);
+                    g2d.setColor(new Color(0, 255, 255, (int) (alpha * 255)));
+                    g2d.setFont(getFont());
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                    int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                    g2d.drawString(getText(), x, y);
+                }
+                
+                // Draw main text
+                g2d.setColor(NEON_CYAN);
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                g2d.drawString(getText(), x, y);
+                
+                g2d.dispose();
+            }
+        };
+        title.setFont(new Font("Consolas", Font.BOLD, 52));
         title.setForeground(NEON_CYAN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
-        title.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(NEON_CYAN, 3),
-            BorderFactory.createEmptyBorder(20, 40, 20, 40)
-        ));
+        title.setPreferredSize(new Dimension(500, 80));
         
-        // Subtitle
-        JLabel subtitle = new JLabel("CYBERPUNK EDITION");
+        // Subtitle with glow
+        JLabel subtitle = new JLabel("CYBERPUNK EDITION") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                
+                // Draw glow
+                for (int i = 8; i > 0; i -= 2) {
+                    g2d.setColor(new Color(255, 0, 255, 30));
+                    g2d.setFont(getFont());
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                    int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                    g2d.drawString(getText(), x, y);
+                }
+                
+                g2d.setColor(NEON_MAGENTA);
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                g2d.drawString(getText(), x, y);
+                
+                g2d.dispose();
+            }
+        };
         subtitle.setFont(new Font("Consolas", Font.PLAIN, 20));
         subtitle.setForeground(NEON_MAGENTA);
         subtitle.setHorizontalAlignment(SwingConstants.CENTER);
         
-        // Menu buttons
-        JButton newGameBtn = createLargeNeonButton("🎮 NEW GAME", NEON_GREEN, e -> showDifficultyPanel());
-        JButton loadGameBtn = createLargeNeonButton("📂 LOAD GAME", NEON_YELLOW, e -> showLoadGamePanel());
-        JButton quitBtn = createLargeNeonButton("❌ QUIT", NEON_RED, e -> System.exit(0));
+        // Menu buttons with enhanced glow
+        NeonButton newGameBtn = new NeonButton("🎮 NEW GAME", NEON_GREEN, 24, new Dimension(400, 80));
+        newGameBtn.addActionListener(e -> showDifficultyPanel());
+        
+        NeonButton loadGameBtn = new NeonButton("📂 LOAD GAME", NEON_YELLOW, 24, new Dimension(400, 80));
+        loadGameBtn.addActionListener(e -> showLoadGameDialog());
+        
+        NeonButton quitBtn = new NeonButton("❌ QUIT", NEON_RED, 24, new Dimension(400, 80));
+        quitBtn.addActionListener(e -> System.exit(0));
         
         panel.add(title, gbc);
-        gbc.insets = new Insets(10, 0, 40, 0);
+        gbc.insets = new Insets(10, 0, 50, 0);
         panel.add(subtitle, gbc);
         gbc.insets = new Insets(15, 0, 15, 0);
         panel.add(newGameBtn, gbc);
@@ -125,7 +228,20 @@ public class SudokuGUI extends JFrame {
     }
     
     private JPanel createDifficultyPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Draw glowing background pattern
+                g2d.setColor(new Color(255, 0, 255, 20));
+                for (int i = 0; i < getWidth(); i += 50) {
+                    g2d.drawLine(i, 0, i, getHeight());
+                }
+            }
+        };
         panel.setBackground(BLACK_BG);
         panel.setBorder(BorderFactory.createEmptyBorder(50, 100, 50, 100));
         
@@ -134,22 +250,49 @@ public class SudokuGUI extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(15, 0, 15, 0);
         
-        // Title
-        JLabel title = new JLabel("⚡ SELECT DIFFICULTY ⚡");
+        // Glowing title
+        JLabel title = new JLabel("⚡ SELECT DIFFICULTY ⚡") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                
+                for (int i = 10; i > 0; i -= 2) {
+                    g2d.setColor(new Color(0, 255, 255, 40));
+                    g2d.setFont(getFont());
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                    int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                    g2d.drawString(getText(), x, y);
+                }
+                
+                g2d.setColor(NEON_CYAN);
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                g2d.drawString(getText(), x, y);
+                g2d.dispose();
+            }
+        };
         title.setFont(new Font("Consolas", Font.BOLD, 36));
-        title.setForeground(NEON_CYAN);
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        title.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(NEON_CYAN, 3),
-            BorderFactory.createEmptyBorder(15, 30, 15, 30)
-        ));
+        title.setPreferredSize(new Dimension(500, 60));
         
-        // Difficulty buttons
-        JButton easyBtn = createLargeNeonButton("⭐ EASY (30 CELLS)", NEON_GREEN, e -> startNewGame(30, "EASY"));
-        JButton mediumBtn = createLargeNeonButton("⭐⭐ MEDIUM (45 CELLS)", NEON_YELLOW, e -> startNewGame(45, "MEDIUM"));
-        JButton hardBtn = createLargeNeonButton("⭐⭐⭐ HARD (55 CELLS)", NEON_ORANGE, e -> startNewGame(55, "HARD"));
-        JButton customBtn = createLargeNeonButton("⚙ CUSTOM", NEON_PINK, e -> showCustomDifficultyDialog());
-        JButton backBtn = createLargeNeonButton("← BACK TO MENU", NEON_BLUE, e -> cardLayout.show(mainPanel, MENU_PANEL));
+        // Difficulty buttons with glow
+        NeonButton easyBtn = new NeonButton("⭐ EASY (30 CELLS)", NEON_GREEN, 20, new Dimension(400, 70));
+        easyBtn.addActionListener(e -> startNewGame(30, "EASY"));
+        
+        NeonButton mediumBtn = new NeonButton("⭐⭐ MEDIUM (45 CELLS)", NEON_YELLOW, 20, new Dimension(400, 70));
+        mediumBtn.addActionListener(e -> startNewGame(45, "MEDIUM"));
+        
+        NeonButton hardBtn = new NeonButton("⭐⭐⭐ HARD (55 CELLS)", NEON_ORANGE, 20, new Dimension(400, 70));
+        hardBtn.addActionListener(e -> startNewGame(55, "HARD"));
+        
+        NeonButton customBtn = new NeonButton("⚙ CUSTOM", NEON_PINK, 20, new Dimension(400, 70));
+        customBtn.addActionListener(e -> showCustomDifficultyDialog());
+        
+        NeonButton backBtn = new NeonButton("← BACK TO MENU", NEON_BLUE, 18, new Dimension(300, 60));
+        backBtn.addActionListener(e -> cardLayout.show(mainPanel, MENU_PANEL));
         
         panel.add(title, gbc);
         gbc.insets = new Insets(20, 0, 20, 0);
@@ -166,35 +309,90 @@ public class SudokuGUI extends JFrame {
     private JPanel createGamePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(BLACK_BG);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         
-        // Top panel with title, timer, and back button
+        // Top panel with glowing border
         JPanel topPanel = new JPanel(new BorderLayout(10, 10));
         topPanel.setBackground(BLACK_BG);
+        topPanel.setBorder(createGlowBorder(NEON_CYAN, 3));
         
-        titleLabel = new JLabel("⚡ NEON SUDOKU ⚡");
-        titleLabel.setFont(new Font("Consolas", Font.BOLD, 24));
-        titleLabel.setForeground(NEON_CYAN);
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        timerLabel = new JLabel("⏱ 00:00:00");
-        timerLabel.setFont(new Font("Consolas", Font.BOLD, 18));
-        timerLabel.setForeground(NEON_GREEN);
-        
-        JButton backBtn = createSmallNeonButton("← MENU", NEON_BLUE, e -> {
+        // Back button
+        NeonButton backBtn = new NeonButton("← MENU", NEON_BLUE, 12, new Dimension(100, 35));
+        backBtn.addActionListener(e -> {
             isRunning = false;
             cardLayout.show(mainPanel, MENU_PANEL);
         });
+        
+        // Animated title
+        titleLabel = new JLabel("⚡ NEON SUDOKU ⚡") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                
+                // Pulsing glow
+                int glowSize = (int) (8 * glowIntensity);
+                for (int i = glowSize; i > 0; i--) {
+                    float alpha = 0.15f * (1 - (float) i / glowSize);
+                    g2d.setColor(new Color(0, 255, 255, (int) (alpha * 255)));
+                    g2d.setFont(getFont());
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                    int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                    g2d.drawString(getText(), x, y);
+                }
+                
+                g2d.setColor(NEON_CYAN);
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                g2d.drawString(getText(), x, y);
+                g2d.dispose();
+            }
+        };
+        titleLabel.setFont(new Font("Consolas", Font.BOLD, 22));
+        titleLabel.setPreferredSize(new Dimension(300, 40));
+        
+        // Timer with glow
+        timerLabel = new JLabel("⏱ 00:00:00") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                
+                // Green glow
+                for (int i = 5; i > 0; i--) {
+                    g2d.setColor(new Color(57, 255, 20, 50));
+                    g2d.setFont(getFont());
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int x = getWidth() - fm.stringWidth(getText()) - 10;
+                    int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                    g2d.drawString(getText(), x, y);
+                }
+                
+                g2d.setColor(NEON_GREEN);
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = getWidth() - fm.stringWidth(getText()) - 10;
+                int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                g2d.drawString(getText(), x, y);
+                g2d.dispose();
+            }
+        };
+        timerLabel.setFont(new Font("Consolas", Font.BOLD, 16));
+        timerLabel.setPreferredSize(new Dimension(150, 40));
         
         topPanel.add(backBtn, BorderLayout.WEST);
         topPanel.add(titleLabel, BorderLayout.CENTER);
         topPanel.add(timerLabel, BorderLayout.EAST);
         
-        // Status label
+        // Status label with border
         statusLabel = new JLabel("SELECT A CELL TO BEGIN");
         statusLabel.setFont(new Font("Consolas", Font.BOLD, 14));
         statusLabel.setForeground(NEON_YELLOW);
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statusLabel.setBorder(createGlowBorder(NEON_YELLOW, 2));
         
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.setBackground(BLACK_BG);
@@ -206,8 +404,9 @@ public class SudokuGUI extends JFrame {
         headerPanel.add(topPanel, BorderLayout.NORTH);
         headerPanel.add(statusPanel, BorderLayout.SOUTH);
         
-        // Grid panel
+        // Grid panel with glow border
         JPanel gridPanel = createGridPanel();
+        gridPanel.setBorder(createGlowBorder(NEON_MAGENTA, 4));
         
         // Control panel
         JPanel controlPanel = createControlPanel();
@@ -219,13 +418,20 @@ public class SudokuGUI extends JFrame {
         return panel;
     }
     
+    private Border createGlowBorder(Color color, int thickness) {
+        return BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color, thickness),
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(color.getRed(), color.getGreen(), color.getBlue(), 100), 2),
+                BorderFactory.createLineBorder(new Color(color.getRed(), color.getGreen(), color.getBlue(), 50), 1)
+            )
+        );
+    }
+    
     private JPanel createGridPanel() {
         JPanel gridPanel = new JPanel(new GridLayout(GRID_SIZE, GRID_SIZE, 2, 2));
         gridPanel.setBackground(NEON_MAGENTA);
-        gridPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(NEON_CYAN, 4),
-            BorderFactory.createEmptyBorder(3, 3, 3, 3)
-        ));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         
         cells = new JTextField[GRID_SIZE][GRID_SIZE];
         
@@ -241,16 +447,58 @@ public class SudokuGUI extends JFrame {
     }
     
     private JTextField createCell(int row, int col) {
-        JTextField cell = new JTextField();
+        JTextField cell = new JTextField() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Draw background
+                g2d.setColor(getBackground());
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                
+                // Draw glow if selected
+                if (getBackground().equals(NEON_MAGENTA)) {
+                    for (int i = 8; i > 0; i--) {
+                        g2d.setColor(new Color(255, 0, 255, 30));
+                        g2d.drawRoundRect(i/2, i/2, getWidth()-i, getHeight()-i, 5, 5);
+                    }
+                }
+                
+                // Draw text with glow
+                String text = getText();
+                if (!text.isEmpty()) {
+                    g2d.setFont(getFont());
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int x = (getWidth() - fm.stringWidth(text)) / 2;
+                    int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+                    
+                    // Text glow
+                    if (getForeground().equals(NEON_GREEN) || getForeground().equals(NEON_CYAN)) {
+                        for (int i = 4; i > 0; i--) {
+                            g2d.setColor(new Color(getForeground().getRed(), getForeground().getGreen(), getForeground().getBlue(), 80));
+                            g2d.drawString(text, x, y);
+                        }
+                    }
+                    
+                    g2d.setColor(getForeground());
+                    g2d.drawString(text, x, y);
+                }
+                
+                g2d.dispose();
+            }
+        };
+        
         cell.setHorizontalAlignment(JTextField.CENTER);
         cell.setFont(new Font("Consolas", Font.BOLD, 24));
         cell.setPreferredSize(new Dimension(CELL_SIZE, CELL_SIZE));
         cell.setBackground(DARK_BG);
         cell.setForeground(TEXT_COLOR);
         cell.setCaretColor(NEON_CYAN);
-        cell.setBorder(BorderFactory.createLineBorder(NEON_BLUE, 1));
+        cell.setBorder(BorderFactory.createLineBorder(NEON_BLUE_DIM, 1));
         cell.setSelectionColor(NEON_MAGENTA);
         cell.setSelectedTextColor(BLACK_BG);
+        cell.setOpaque(false);
         
         final int r = row;
         final int c = col;
@@ -298,16 +546,28 @@ public class SudokuGUI extends JFrame {
         mainPanel.setBackground(BLACK_BG);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // Button panel
+        // Button panel with glow border
         JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 8, 8));
         buttonPanel.setBackground(BLACK_BG);
+        buttonPanel.setBorder(createGlowBorder(NEON_BLUE, 2));
         
-        JButton saveBtn = createSmallNeonButton("💾 SAVE", NEON_GREEN, e -> saveGame());
-        JButton loadBtn = createSmallNeonButton("📂 LOAD", NEON_YELLOW, e -> showLoadGamePanel());
-        JButton hintBtn = createSmallNeonButton("💡 HINT", NEON_PINK, e -> showHint());
-        JButton solveBtn = createSmallNeonButton("🤖 SOLVE", NEON_ORANGE, e -> solvePuzzle());
-        JButton clearBtn = createSmallNeonButton("🗑 CLEAR", NEON_RED, e -> clearSelectedCell());
-        JButton newBtn = createSmallNeonButton("🎮 NEW", NEON_CYAN, e -> cardLayout.show(mainPanel, DIFFICULTY_PANEL));
+        NeonButton saveBtn = new NeonButton("💾 SAVE", NEON_GREEN, 12, new Dimension(100, 40));
+        saveBtn.addActionListener(e -> saveGame());
+        
+        NeonButton loadBtn = new NeonButton("📂 LOAD", NEON_YELLOW, 12, new Dimension(100, 40));
+        loadBtn.addActionListener(e -> showLoadGameDialog());
+        
+        NeonButton hintBtn = new NeonButton("💡 HINT", NEON_PINK, 12, new Dimension(100, 40));
+        hintBtn.addActionListener(e -> showHint());
+        
+        NeonButton solveBtn = new NeonButton("🤖 SOLVE", NEON_ORANGE, 12, new Dimension(100, 40));
+        solveBtn.addActionListener(e -> solvePuzzle());
+        
+        NeonButton clearBtn = new NeonButton("🗑 CLEAR", NEON_RED, 12, new Dimension(100, 40));
+        clearBtn.addActionListener(e -> clearSelectedCell());
+        
+        NeonButton newBtn = new NeonButton("🎮 NEW", NEON_CYAN, 12, new Dimension(100, 40));
+        newBtn.addActionListener(e -> cardLayout.show(mainPanel, DIFFICULTY_PANEL));
         
         buttonPanel.add(saveBtn);
         buttonPanel.add(loadBtn);
@@ -316,34 +576,14 @@ public class SudokuGUI extends JFrame {
         buttonPanel.add(clearBtn);
         buttonPanel.add(newBtn);
         
-        // Number pad
+        // Number pad with glow
         JPanel numberPanel = new JPanel(new GridLayout(1, 9, 5, 5));
         numberPanel.setBackground(BLACK_BG);
+        numberPanel.setBorder(createGlowBorder(NEON_PURPLE, 2));
         
         for (int i = 1; i <= 9; i++) {
             final int num = i;
-            JButton numBtn = new JButton(String.valueOf(i));
-            numBtn.setFont(new Font("Consolas", Font.BOLD, 18));
-            numBtn.setBackground(DARK_BG);
-            numBtn.setForeground(NEON_BLUE);
-            numBtn.setBorder(BorderFactory.createLineBorder(NEON_BLUE, 2));
-            numBtn.setFocusPainted(false);
-            numBtn.setPreferredSize(new Dimension(45, 45));
-            
-            numBtn.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    numBtn.setBackground(NEON_BLUE);
-                    numBtn.setForeground(BLACK_BG);
-                }
-                
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    numBtn.setBackground(DARK_BG);
-                    numBtn.setForeground(NEON_BLUE);
-                }
-            });
-            
+            NeonButton numBtn = new NeonButton(String.valueOf(i), NEON_BLUE, 16, new Dimension(45, 45));
             numBtn.addActionListener(e -> insertNumber(num));
             numberPanel.add(numBtn);
         }
@@ -354,107 +594,26 @@ public class SudokuGUI extends JFrame {
         return mainPanel;
     }
     
-    private JButton createLargeNeonButton(String text, Color neonColor, ActionListener listener) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Consolas", Font.BOLD, 24));
-        btn.setBackground(BLACK_BG);
-        btn.setForeground(neonColor);
-        btn.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(neonColor, 3),
-            BorderFactory.createEmptyBorder(20, 50, 20, 50)
-        ));
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setPreferredSize(new Dimension(400, 80));
-        
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(neonColor);
-                btn.setForeground(BLACK_BG);
-                btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(Color.WHITE, 3),
-                    BorderFactory.createEmptyBorder(20, 50, 20, 50)
-                ));
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(BLACK_BG);
-                btn.setForeground(neonColor);
-                btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(neonColor, 3),
-                    BorderFactory.createEmptyBorder(20, 50, 20, 50)
-                ));
-            }
-        });
-        
-        btn.addActionListener(listener);
-        return btn;
-    }
-    
-    private JButton createSmallNeonButton(String text, Color neonColor, ActionListener listener) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Consolas", Font.BOLD, 12));
-        btn.setBackground(DARK_BG);
-        btn.setForeground(neonColor);
-        btn.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(neonColor, 2),
-            BorderFactory.createEmptyBorder(8, 15, 8, 15)
-        ));
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(neonColor);
-                btn.setForeground(BLACK_BG);
-                btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(Color.WHITE, 2),
-                    BorderFactory.createEmptyBorder(8, 15, 8, 15)
-                ));
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(DARK_BG);
-                btn.setForeground(neonColor);
-                btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(neonColor, 2),
-                    BorderFactory.createEmptyBorder(8, 15, 8, 15)
-                ));
-            }
-        });
-        
-        btn.addActionListener(listener);
-        return btn;
-    }
-    
     private void showDifficultyPanel() {
         cardLayout.show(mainPanel, DIFFICULTY_PANEL);
     }
     
-    private void showLoadGamePanel() {
-        // Create a custom dialog with black background
+    private void showLoadGameDialog() {
         JDialog dialog = new JDialog(this, "LOAD GAME", true);
-        dialog.setBackground(BLACK_BG);
         dialog.getContentPane().setBackground(BLACK_BG);
         
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(BLACK_BG);
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         
-        // Title
+        // Glowing title
         JLabel title = new JLabel("⚡ SELECT SAVE FILE ⚡");
         title.setFont(new Font("Consolas", Font.BOLD, 24));
         title.setForeground(NEON_CYAN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setBorder(createGlowBorder(NEON_CYAN, 2));
         panel.add(title, BorderLayout.NORTH);
         
-        // Get save files
         File saveDir = new File(SAVE_DIR);
         File[] saveFiles = saveDir.listFiles((dir, name) -> name.endsWith(".sav"));
         
@@ -464,6 +623,13 @@ public class SudokuGUI extends JFrame {
             noSaves.setForeground(NEON_RED);
             noSaves.setHorizontalAlignment(SwingConstants.CENTER);
             panel.add(noSaves, BorderLayout.CENTER);
+            
+            NeonButton okBtn = new NeonButton("✗ OK", NEON_RED, 14, new Dimension(120, 45));
+            okBtn.addActionListener(e -> dialog.dispose());
+            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            btnPanel.setBackground(BLACK_BG);
+            btnPanel.add(okBtn);
+            panel.add(btnPanel, BorderLayout.SOUTH);
         } else {
             String[] names = new String[saveFiles.length];
             for (int i = 0; i < saveFiles.length; i++) {
@@ -480,15 +646,15 @@ public class SudokuGUI extends JFrame {
             
             JScrollPane scrollPane = new JScrollPane(list);
             scrollPane.setBackground(BLACK_BG);
-            scrollPane.setBorder(BorderFactory.createLineBorder(NEON_CYAN, 2));
+            scrollPane.setBorder(createGlowBorder(NEON_CYAN, 3));
             scrollPane.getViewport().setBackground(BLACK_BG);
             panel.add(scrollPane, BorderLayout.CENTER);
             
-            // Buttons
             JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
             btnPanel.setBackground(BLACK_BG);
             
-            JButton loadBtn = createSmallNeonButton("📂 LOAD", NEON_GREEN, e -> {
+            NeonButton loadBtn = new NeonButton("📂 LOAD", NEON_GREEN, 14, new Dimension(120, 45));
+            loadBtn.addActionListener(e -> {
                 String selected = list.getSelectedValue();
                 if (selected != null) {
                     try {
@@ -514,36 +680,23 @@ public class SudokuGUI extends JFrame {
                 }
             });
             
+            NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(120, 45));
+            cancelBtn.addActionListener(e -> dialog.dispose());
+            
             btnPanel.add(loadBtn);
+            btnPanel.add(cancelBtn);
             panel.add(btnPanel, BorderLayout.SOUTH);
-        }
-        
-        // Cancel button
-        JPanel cancelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        cancelPanel.setBackground(BLACK_BG);
-        JButton cancelBtn = createSmallNeonButton("❌ CANCEL", NEON_RED, e -> dialog.dispose());
-        cancelPanel.add(cancelBtn);
-        
-        if (saveFiles == null || saveFiles.length == 0) {
-            panel.add(cancelPanel, BorderLayout.SOUTH);
-        } else {
-            JPanel bottomPanel = new JPanel(new BorderLayout());
-            bottomPanel.setBackground(BLACK_BG);
-            bottomPanel.add(panel.getComponent(2), BorderLayout.NORTH);
-            bottomPanel.add(cancelPanel, BorderLayout.SOUTH);
-            panel.add(bottomPanel, BorderLayout.SOUTH);
         }
         
         dialog.add(panel);
         dialog.pack();
-        dialog.setSize(400, 400);
+        dialog.setSize(450, 450);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
     
     private void showCustomDifficultyDialog() {
         JDialog dialog = new JDialog(this, "CUSTOM DIFFICULTY", true);
-        dialog.setBackground(BLACK_BG);
         dialog.getContentPane().setBackground(BLACK_BG);
         
         JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -554,6 +707,7 @@ public class SudokuGUI extends JFrame {
         title.setFont(new Font("Consolas", Font.BOLD, 24));
         title.setForeground(NEON_PINK);
         title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setBorder(createGlowBorder(NEON_PINK, 2));
         panel.add(title, BorderLayout.NORTH);
         
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -569,7 +723,7 @@ public class SudokuGUI extends JFrame {
         field.setBackground(DARK_BG);
         field.setForeground(NEON_CYAN);
         field.setCaretColor(NEON_CYAN);
-        field.setBorder(BorderFactory.createLineBorder(NEON_CYAN, 2));
+        field.setBorder(createGlowBorder(NEON_CYAN, 2));
         field.setHorizontalAlignment(JTextField.CENTER);
         inputPanel.add(field, BorderLayout.CENTER);
         
@@ -578,7 +732,8 @@ public class SudokuGUI extends JFrame {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(BLACK_BG);
         
-        JButton okBtn = createSmallNeonButton("✓ OK", NEON_GREEN, e -> {
+        NeonButton okBtn = new NeonButton("✓ OK", NEON_GREEN, 14, new Dimension(100, 45));
+        okBtn.addActionListener(e -> {
             try {
                 int empty = Integer.parseInt(field.getText().trim());
                 if (empty >= 1 && empty <= 80) {
@@ -594,7 +749,8 @@ public class SudokuGUI extends JFrame {
             }
         });
         
-        JButton cancelBtn = createSmallNeonButton("✗ CANCEL", NEON_RED, e -> dialog.dispose());
+        NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(100, 45));
+        cancelBtn.addActionListener(e -> dialog.dispose());
         
         btnPanel.add(okBtn);
         btnPanel.add(cancelBtn);
@@ -602,7 +758,7 @@ public class SudokuGUI extends JFrame {
         
         dialog.add(panel);
         dialog.pack();
-        dialog.setSize(350, 250);
+        dialog.setSize(400, 280);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
@@ -643,7 +799,7 @@ public class SudokuGUI extends JFrame {
                 }
                 
                 if (fixed[row][col] && value != 0) {
-                    cell.setBackground(new Color(25, 25, 35));
+                    cell.setBackground(new Color(20, 20, 30));
                     cell.setForeground(NEON_CYAN);
                     cell.setFont(new Font("Consolas", Font.BOLD, 24));
                     cell.setEditable(false);
@@ -653,7 +809,7 @@ public class SudokuGUI extends JFrame {
                     cell.setForeground(TEXT_COLOR);
                     cell.setFont(new Font("Consolas", Font.PLAIN, 24));
                     cell.setEditable(true);
-                    cell.setBorder(BorderFactory.createLineBorder(NEON_BLUE, 1));
+                    cell.setBorder(BorderFactory.createLineBorder(NEON_BLUE_DIM, 1));
                 }
             }
         }
@@ -763,7 +919,6 @@ public class SudokuGUI extends JFrame {
         }
         
         JDialog dialog = new JDialog(this, "SAVE GAME", true);
-        dialog.setBackground(BLACK_BG);
         dialog.getContentPane().setBackground(BLACK_BG);
         
         JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -774,6 +929,7 @@ public class SudokuGUI extends JFrame {
         title.setFont(new Font("Consolas", Font.BOLD, 24));
         title.setForeground(NEON_GREEN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setBorder(createGlowBorder(NEON_GREEN, 2));
         panel.add(title, BorderLayout.NORTH);
         
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -789,7 +945,7 @@ public class SudokuGUI extends JFrame {
         field.setBackground(DARK_BG);
         field.setForeground(NEON_GREEN);
         field.setCaretColor(NEON_GREEN);
-        field.setBorder(BorderFactory.createLineBorder(NEON_GREEN, 2));
+        field.setBorder(createGlowBorder(NEON_GREEN, 2));
         inputPanel.add(field, BorderLayout.CENTER);
         
         panel.add(inputPanel, BorderLayout.CENTER);
@@ -797,7 +953,8 @@ public class SudokuGUI extends JFrame {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(BLACK_BG);
         
-        JButton okBtn = createSmallNeonButton("✓ SAVE", NEON_GREEN, e -> {
+        NeonButton okBtn = new NeonButton("✓ SAVE", NEON_GREEN, 14, new Dimension(100, 45));
+        okBtn.addActionListener(e -> {
             String filename = field.getText().trim();
             if (!filename.isEmpty()) {
                 if (!filename.endsWith(".sav")) filename += ".sav";
@@ -816,7 +973,8 @@ public class SudokuGUI extends JFrame {
             }
         });
         
-        JButton cancelBtn = createSmallNeonButton("✗ CANCEL", NEON_RED, e -> dialog.dispose());
+        NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(100, 45));
+        cancelBtn.addActionListener(e -> dialog.dispose());
         
         btnPanel.add(okBtn);
         btnPanel.add(cancelBtn);
@@ -824,14 +982,13 @@ public class SudokuGUI extends JFrame {
         
         dialog.add(panel);
         dialog.pack();
-        dialog.setSize(400, 250);
+        dialog.setSize(400, 280);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
     
     private void showErrorDialog(String message) {
         JDialog dialog = new JDialog(this, "ERROR", true);
-        dialog.setBackground(BLACK_BG);
         dialog.getContentPane().setBackground(BLACK_BG);
         
         JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -844,7 +1001,9 @@ public class SudokuGUI extends JFrame {
         label.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(label, BorderLayout.CENTER);
         
-        JButton okBtn = createSmallNeonButton("✗ OK", NEON_RED, e -> dialog.dispose());
+        NeonButton okBtn = new NeonButton("✗ OK", NEON_RED, 14, new Dimension(100, 45));
+        okBtn.addActionListener(e -> dialog.dispose());
+        
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnPanel.setBackground(BLACK_BG);
         btnPanel.add(okBtn);
@@ -852,6 +1011,7 @@ public class SudokuGUI extends JFrame {
         
         dialog.add(panel);
         dialog.pack();
+        dialog.setSize(400, 200);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
@@ -871,7 +1031,6 @@ public class SudokuGUI extends JFrame {
     
     private void showInfoDialog(String message) {
         JDialog dialog = new JDialog(this, "INFO", true);
-        dialog.setBackground(BLACK_BG);
         dialog.getContentPane().setBackground(BLACK_BG);
         
         JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -884,7 +1043,9 @@ public class SudokuGUI extends JFrame {
         label.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(label, BorderLayout.CENTER);
         
-        JButton okBtn = createSmallNeonButton("✓ OK", NEON_GREEN, e -> dialog.dispose());
+        NeonButton okBtn = new NeonButton("✓ OK", NEON_GREEN, 14, new Dimension(100, 45));
+        okBtn.addActionListener(e -> dialog.dispose());
+        
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnPanel.setBackground(BLACK_BG);
         btnPanel.add(okBtn);
@@ -892,6 +1053,7 @@ public class SudokuGUI extends JFrame {
         
         dialog.add(panel);
         dialog.pack();
+        dialog.setSize(400, 200);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
@@ -900,7 +1062,6 @@ public class SudokuGUI extends JFrame {
         if (game == null) return;
         
         JDialog dialog = new JDialog(this, "SOLVE PUZZLE", true);
-        dialog.setBackground(BLACK_BG);
         dialog.getContentPane().setBackground(BLACK_BG);
         
         JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -916,7 +1077,8 @@ public class SudokuGUI extends JFrame {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(BLACK_BG);
         
-        JButton yesBtn = createSmallNeonButton("✓ YES", NEON_GREEN, e -> {
+        NeonButton yesBtn = new NeonButton("✓ YES", NEON_GREEN, 14, new Dimension(100, 45));
+        yesBtn.addActionListener(e -> {
             game.solve();
             updateGridDisplay();
             isRunning = false;
@@ -924,7 +1086,8 @@ public class SudokuGUI extends JFrame {
             checkWin();
         });
         
-        JButton noBtn = createSmallNeonButton("✗ NO", NEON_RED, e -> dialog.dispose());
+        NeonButton noBtn = new NeonButton("✗ NO", NEON_RED, 14, new Dimension(100, 45));
+        noBtn.addActionListener(e -> dialog.dispose());
         
         btnPanel.add(yesBtn);
         btnPanel.add(noBtn);
@@ -932,6 +1095,7 @@ public class SudokuGUI extends JFrame {
         
         dialog.add(panel);
         dialog.pack();
+        dialog.setSize(400, 200);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
@@ -943,7 +1107,6 @@ public class SudokuGUI extends JFrame {
             long total = elapsedTime + (current - startTime);
             
             JDialog dialog = new JDialog(this, "⚡ VICTORY ⚡", true);
-            dialog.setBackground(BLACK_BG);
             dialog.getContentPane().setBackground(BLACK_BG);
             
             JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -960,19 +1123,21 @@ public class SudokuGUI extends JFrame {
             text.setBackground(BLACK_BG);
             text.setForeground(NEON_GREEN);
             text.setEditable(false);
-            text.setBorder(BorderFactory.createLineBorder(NEON_GREEN, 3));
+            text.setBorder(createGlowBorder(NEON_GREEN, 3));
             
             panel.add(text, BorderLayout.CENTER);
             
             JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
             btnPanel.setBackground(BLACK_BG);
             
-            JButton newBtn = createSmallNeonButton("🎮 NEW GAME", NEON_CYAN, e -> {
+            NeonButton newBtn = new NeonButton("🎮 NEW GAME", NEON_CYAN, 14, new Dimension(150, 45));
+            newBtn.addActionListener(e -> {
                 dialog.dispose();
                 cardLayout.show(mainPanel, DIFFICULTY_PANEL);
             });
             
-            JButton menuBtn = createSmallNeonButton("🏠 MENU", NEON_BLUE, e -> {
+            NeonButton menuBtn = new NeonButton("🏠 MENU", NEON_BLUE, 14, new Dimension(120, 45));
+            menuBtn.addActionListener(e -> {
                 dialog.dispose();
                 cardLayout.show(mainPanel, MENU_PANEL);
             });
@@ -983,6 +1148,7 @@ public class SudokuGUI extends JFrame {
             
             dialog.add(panel);
             dialog.pack();
+            dialog.setSize(500, 350);
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
             
@@ -991,23 +1157,109 @@ public class SudokuGUI extends JFrame {
         }
     }
     
+    // Custom Neon Button class with glow effects
+    private class NeonButton extends JButton {
+        private Color neonColor;
+        private boolean isHovered = false;
+        
+        public NeonButton(String text, Color neonColor, int fontSize, Dimension size) {
+            super(text);
+            this.neonColor = neonColor;
+            
+            setFont(new Font("Consolas", Font.BOLD, fontSize));
+            setBackground(BLACK_BG);
+            setForeground(neonColor);
+            setBorder(createGlowBorder(neonColor, 2));
+            setFocusPainted(false);
+            setContentAreaFilled(false);
+            setOpaque(false);
+            setPreferredSize(size);
+            
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    isHovered = true;
+                    setBackground(neonColor);
+                    setForeground(BLACK_BG);
+                    repaint();
+                }
+                
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    isHovered = false;
+                    setBackground(BLACK_BG);
+                    setForeground(neonColor);
+                    repaint();
+                }
+            });
+        }
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            // Draw glow effect
+            if (isHovered) {
+                // Strong glow when hovered
+                for (int i = 15; i > 0; i -= 2) {
+                    float alpha = 0.3f * (1 - (float) i / 15);
+                    g2d.setColor(new Color(neonColor.getRed(), neonColor.getGreen(), neonColor.getBlue(), (int) (alpha * 255)));
+                    g2d.fillRoundRect(i/2, i/2, getWidth() - i, getHeight() - i, 10, 10);
+                }
+                g2d.setColor(neonColor);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+            } else {
+                // Subtle glow when not hovered
+                for (int i = 8; i > 0; i -= 2) {
+                    float alpha = 0.15f * (1 - (float) i / 8);
+                    g2d.setColor(new Color(neonColor.getRed(), neonColor.getGreen(), neonColor.getBlue(), (int) (alpha * 255)));
+                    g2d.drawRoundRect(i/2, i/2, getWidth() - i, getHeight() - i, 10, 10);
+                }
+                g2d.setColor(BLACK_BG);
+                g2d.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 8, 8);
+            }
+            
+            // Draw text with glow
+            g2d.setFont(getFont());
+            FontMetrics fm = g2d.getFontMetrics();
+            String text = getText();
+            int x = (getWidth() - fm.stringWidth(text)) / 2;
+            int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
+            
+            if (!isHovered) {
+                // Text glow effect
+                for (int i = 3; i > 0; i--) {
+                    g2d.setColor(new Color(neonColor.getRed(), neonColor.getGreen(), neonColor.getBlue(), 100));
+                    g2d.drawString(text, x, y);
+                }
+            }
+            
+            g2d.setColor(getForeground());
+            g2d.drawString(text, x, y);
+            
+            // Draw border
+            if (!isHovered) {
+                g2d.setColor(neonColor);
+                g2d.drawRoundRect(2, 2, getWidth() - 5, getHeight() - 5, 8, 8);
+            }
+            
+            g2d.dispose();
+        }
+    }
+    
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             
-            // Set default colors for all Swing components
-            UIManager.put("Panel.background", new Color(5, 5, 8));
-            UIManager.put("OptionPane.background", new Color(5, 5, 8));
-            UIManager.put("OptionPane.messageForeground", new Color(0, 255, 255));
-            UIManager.put("TextField.background", new Color(15, 15, 20));
+            // Set default colors
+            UIManager.put("Panel.background", new Color(0, 0, 5));
+            UIManager.put("OptionPane.background", new Color(0, 0, 5));
+            UIManager.put("TextField.background", new Color(10, 10, 15));
             UIManager.put("TextField.foreground", new Color(0, 255, 255));
-            UIManager.put("TextField.caretForeground", new Color(0, 255, 255));
-            UIManager.put("Button.background", new Color(15, 15, 20));
-            UIManager.put("Label.foreground", new Color(220, 220, 220));
-            UIManager.put("List.background", new Color(15, 15, 20));
-            UIManager.put("List.foreground", new Color(255, 255, 0));
-            UIManager.put("ScrollPane.background", new Color(5, 5, 8));
-            UIManager.put("Viewport.background", new Color(5, 5, 8));
+            UIManager.put("Button.background", new Color(0, 0, 5));
+            UIManager.put("Label.foreground", new Color(200, 200, 200));
+            UIManager.put("List.background", new Color(10, 10, 15));
         } catch (Exception e) {
             e.printStackTrace();
         }
