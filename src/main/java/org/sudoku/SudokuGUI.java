@@ -60,7 +60,7 @@ public class SudokuGUI extends JFrame {
     private static final String GAME_PANEL = "GAME";
     
     public SudokuGUI() {
-        setTitle("⚡ NEON SUDOKU ⚡");
+        setTitle("SUDOKU");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         
@@ -141,7 +141,7 @@ public class SudokuGUI extends JFrame {
         gbc.insets = new Insets(20, 0, 20, 0);
         
         // Animated glowing title
-        JLabel title = new JLabel("⚡ NEON SUDOKU ⚡") {
+        JLabel title = new JLabel("SUDOKU") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -176,7 +176,7 @@ public class SudokuGUI extends JFrame {
         title.setPreferredSize(new Dimension(500, 80));
         
         // Subtitle with glow
-        JLabel subtitle = new JLabel("CYBERPUNK EDITION") {
+        JLabel subtitle = new JLabel("🧩 Train Your Brain! 🎯") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -251,7 +251,7 @@ public class SudokuGUI extends JFrame {
         gbc.insets = new Insets(15, 0, 15, 0);
         
         // Glowing title
-        JLabel title = new JLabel("⚡ SELECT DIFFICULTY ⚡") {
+        JLabel title = new JLabel("SELECT DIFFICULTY") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -324,7 +324,7 @@ public class SudokuGUI extends JFrame {
         });
         
         // Animated title
-        titleLabel = new JLabel("⚡ NEON SUDOKU ⚡") {
+        titleLabel = new JLabel("SUDOKU") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -607,7 +607,7 @@ public class SudokuGUI extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         
         // Glowing title
-        JLabel title = new JLabel("⚡ SELECT SAVE FILE ⚡");
+        JLabel title = new JLabel("SELECT SAVE FILE");
         title.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
         title.setForeground(NEON_CYAN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1106,7 +1106,7 @@ public class SudokuGUI extends JFrame {
             long current = System.currentTimeMillis();
             long total = elapsedTime + (current - startTime);
             
-            JDialog dialog = new JDialog(this, "⚡ VICTORY ⚡", true);
+            JDialog dialog = new JDialog(this, "VICTORY!", true);
             dialog.getContentPane().setBackground(BLACK_BG);
             
             JPanel panel = new JPanel(new BorderLayout(20, 20));
@@ -1114,7 +1114,7 @@ public class SudokuGUI extends JFrame {
             panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
             
             JTextArea text = new JTextArea(
-                "⚡⚡⚡ CONGRATULATIONS! ⚡⚡⚡\n\n" +
+                "🎉🎉🎉 CONGRATULATIONS! 🎉🎉🎉\n\n" +
                 "YOU SOLVED THE PUZZLE!\n\n" +
                 "TIME: " + formatTime(total) + "\n" +
                 "DIFFICULTY: " + difficulty
