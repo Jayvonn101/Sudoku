@@ -22,8 +22,12 @@ public class SudokuGUI extends JFrame {
     private int selectedRow = -1;
     private int selectedCol = -1;
     private static final int GRID_SIZE = 9;
-    private static final int CELL_SIZE = 55;
+    private static final int CELL_SIZE = 70;
     private static final String SAVE_DIR = "saves/";
+    
+    // Window dimensions
+    private static final int WINDOW_WIDTH = 1000;
+    private static final int WINDOW_HEIGHT = 850;
     
     // Enhanced neon color scheme
     private static final Color BLACK_BG = new Color(0, 0, 5);
@@ -81,11 +85,11 @@ public class SudokuGUI extends JFrame {
     private void initComponents() {
         // Create layered pane for background animation
         JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(700, 700));
+        layeredPane.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         
         // Create dot animation background
         dotAnimation = new DotAnimationPanel();
-        dotAnimation.setBounds(0, 0, 700, 700);
+        dotAnimation.setBounds(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         layeredPane.add(dotAnimation, JLayeredPane.DEFAULT_LAYER);
         
         // Create main content panel with card layout
@@ -93,7 +97,7 @@ public class SudokuGUI extends JFrame {
         mainPanel = new JPanel(cardLayout);
         mainPanel.setBackground(new Color(0, 0, 0, 0));
         mainPanel.setOpaque(false);
-        mainPanel.setBounds(0, 0, 700, 700);
+        mainPanel.setBounds(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         
         // Create all panels
         JPanel menuPanel = createMainMenuPanel();
@@ -151,12 +155,12 @@ public class SudokuGUI extends JFrame {
         };
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(50, 100, 50, 100));
+        panel.setBorder(BorderFactory.createEmptyBorder(65, 130, 65, 130));
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(20, 0, 20, 0);
+        gbc.insets = new Insets(26, 0, 26, 0);
         
         // Animated glowing title
         JLabel title = new JLabel("SUDOKU") {
@@ -188,10 +192,10 @@ public class SudokuGUI extends JFrame {
                 g2d.dispose();
             }
         };
-        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 52));
+        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 68));
         title.setForeground(NEON_CYAN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
-        title.setPreferredSize(new Dimension(500, 80));
+        title.setPreferredSize(new Dimension(650, 100));
         
         // Subtitle with glow
         JLabel subtitle = new JLabel("🧩 Train Your Brain! 🎯") {
@@ -220,24 +224,24 @@ public class SudokuGUI extends JFrame {
                 g2d.dispose();
             }
         };
-        subtitle.setFont(new Font("Arial Unicode MS", Font.PLAIN, 20));
+        subtitle.setFont(new Font("Arial Unicode MS", Font.PLAIN, 26));
         subtitle.setForeground(NEON_MAGENTA);
         subtitle.setHorizontalAlignment(SwingConstants.CENTER);
         
         // Menu buttons with enhanced glow
-        NeonButton newGameBtn = new NeonButton("🎮 NEW GAME", NEON_GREEN, 24, new Dimension(400, 80));
+        NeonButton newGameBtn = new NeonButton("🎮 NEW GAME", NEON_GREEN, 24, new Dimension(520, 100));
         newGameBtn.addActionListener(e -> showDifficultyPanel());
         
-        NeonButton loadGameBtn = new NeonButton("📂 LOAD GAME", NEON_YELLOW, 24, new Dimension(400, 80));
+        NeonButton loadGameBtn = new NeonButton("📂 LOAD GAME", NEON_YELLOW, 24, new Dimension(520, 100));
         loadGameBtn.addActionListener(e -> showLoadGameDialog());
         
-        NeonButton quitBtn = new NeonButton("❌ QUIT", NEON_RED, 24, new Dimension(400, 80));
+        NeonButton quitBtn = new NeonButton("❌ QUIT", NEON_RED, 24, new Dimension(520, 100));
         quitBtn.addActionListener(e -> System.exit(0));
         
         panel.add(title, gbc);
-        gbc.insets = new Insets(10, 0, 50, 0);
+        gbc.insets = new Insets(13, 0, 65, 0);
         panel.add(subtitle, gbc);
-        gbc.insets = new Insets(15, 0, 15, 0);
+        gbc.insets = new Insets(26, 0, 26, 0);
         panel.add(newGameBtn, gbc);
         panel.add(loadGameBtn, gbc);
         panel.add(quitBtn, gbc);
@@ -247,7 +251,7 @@ public class SudokuGUI extends JFrame {
         creditLabel.setFont(new Font("Arial Unicode MS", Font.ITALIC, 12));
         creditLabel.setForeground(new Color(100, 100, 110));
         creditLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.insets = new Insets(30, 0, 0, 0);
+        gbc.insets = new Insets(39, 0, 0, 0);
         panel.add(creditLabel, gbc);
         
         return panel;
@@ -270,12 +274,12 @@ public class SudokuGUI extends JFrame {
         };
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(50, 100, 50, 100));
+        panel.setBorder(BorderFactory.createEmptyBorder(65, 130, 65, 130));
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(15, 0, 15, 0);
+        gbc.insets = new Insets(26, 0, 26, 0);
         
         // Glowing title
         JLabel title = new JLabel("SELECT DIFFICULTY") {
@@ -302,32 +306,32 @@ public class SudokuGUI extends JFrame {
                 g2d.dispose();
             }
         };
-        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 36));
+        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 47));
         title.setPreferredSize(new Dimension(500, 60));
         
         // Difficulty buttons with glow
-        NeonButton easyBtn = new NeonButton("⭐ EASY (30 CELLS)", NEON_GREEN, 20, new Dimension(400, 70));
+        NeonButton easyBtn = new NeonButton("⭐ EASY (30 CELLS)", NEON_GREEN, 20, new Dimension(520, 90));
         easyBtn.addActionListener(e -> startNewGame(30, "EASY"));
         
-        NeonButton mediumBtn = new NeonButton("⭐⭐ MEDIUM (45 CELLS)", NEON_YELLOW, 20, new Dimension(400, 70));
+        NeonButton mediumBtn = new NeonButton("⭐⭐ MEDIUM (45 CELLS)", NEON_YELLOW, 20, new Dimension(520, 90));
         mediumBtn.addActionListener(e -> startNewGame(45, "MEDIUM"));
         
-        NeonButton hardBtn = new NeonButton("⭐⭐⭐ HARD (55 CELLS)", NEON_ORANGE, 20, new Dimension(400, 70));
+        NeonButton hardBtn = new NeonButton("⭐⭐⭐ HARD (55 CELLS)", NEON_ORANGE, 20, new Dimension(520, 90));
         hardBtn.addActionListener(e -> startNewGame(55, "HARD"));
         
-        NeonButton customBtn = new NeonButton("⚙ CUSTOM", NEON_PINK, 20, new Dimension(400, 70));
+        NeonButton customBtn = new NeonButton("⚙ CUSTOM", NEON_PINK, 20, new Dimension(520, 90));
         customBtn.addActionListener(e -> showCustomDifficultyDialog());
         
-        NeonButton backBtn = new NeonButton("← BACK TO MENU", NEON_BLUE, 18, new Dimension(300, 60));
+        NeonButton backBtn = new NeonButton("← BACK TO MENU", NEON_BLUE, 18, new Dimension(390, 80));
         backBtn.addActionListener(e -> cardLayout.show(mainPanel, MENU_PANEL));
         
         panel.add(title, gbc);
-        gbc.insets = new Insets(20, 0, 20, 0);
+        gbc.insets = new Insets(26, 0, 26, 0);
         panel.add(easyBtn, gbc);
         panel.add(mediumBtn, gbc);
         panel.add(hardBtn, gbc);
         panel.add(customBtn, gbc);
-        gbc.insets = new Insets(40, 0, 0, 0);
+        gbc.insets = new Insets(52, 0, 0, 0);
         panel.add(backBtn, gbc);
         
         return panel;
@@ -337,7 +341,7 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // Top panel with glowing border
         JPanel topPanel = new JPanel(new BorderLayout(10, 10));
@@ -345,7 +349,7 @@ public class SudokuGUI extends JFrame {
         topPanel.setBorder(createGlowBorder(NEON_CYAN, 3));
         
         // Back button
-        NeonButton backBtn = new NeonButton("← MENU", NEON_BLUE, 12, new Dimension(100, 35));
+        NeonButton backBtn = new NeonButton("← MENU", NEON_BLUE, 12, new Dimension(130, 45));
         backBtn.addActionListener(e -> {
             isRunning = false;
             cardLayout.show(mainPanel, MENU_PANEL);
@@ -379,8 +383,8 @@ public class SudokuGUI extends JFrame {
                 g2d.dispose();
             }
         };
-        titleLabel.setFont(new Font("Arial Unicode MS", Font.BOLD, 22));
-        titleLabel.setPreferredSize(new Dimension(300, 40));
+        titleLabel.setFont(new Font("Arial Unicode MS", Font.BOLD, 29));
+        titleLabel.setPreferredSize(new Dimension(390, 52));
         
         // Timer with glow
         timerLabel = new JLabel("⏱ 00:00:00") {
@@ -408,8 +412,8 @@ public class SudokuGUI extends JFrame {
                 g2d.dispose();
             }
         };
-        timerLabel.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
-        timerLabel.setPreferredSize(new Dimension(150, 40));
+        timerLabel.setFont(new Font("Arial Unicode MS", Font.BOLD, 21));
+        timerLabel.setPreferredSize(new Dimension(195, 52));
         
         topPanel.add(backBtn, BorderLayout.WEST);
         topPanel.add(titleLabel, BorderLayout.CENTER);
@@ -417,7 +421,7 @@ public class SudokuGUI extends JFrame {
         
         // Status label with border
         statusLabel = new JLabel("SELECT A CELL TO BEGIN");
-        statusLabel.setFont(new Font("Arial Unicode MS", Font.BOLD, 14));
+        statusLabel.setFont(new Font("Arial Unicode MS", Font.BOLD, 18));
         statusLabel.setForeground(NEON_YELLOW);
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setBorder(createGlowBorder(NEON_YELLOW, 2));
@@ -520,7 +524,7 @@ public class SudokuGUI extends JFrame {
         };
         
         cell.setHorizontalAlignment(JTextField.CENTER);
-        cell.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
+        cell.setFont(new Font("Arial Unicode MS", Font.BOLD, 31));
         cell.setPreferredSize(new Dimension(CELL_SIZE, CELL_SIZE));
         cell.setBackground(new Color(10, 10, 15, 200));
         cell.setForeground(TEXT_COLOR);
@@ -575,29 +579,29 @@ public class SudokuGUI extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBackground(new Color(0, 0, 0, 0));
         mainPanel.setOpaque(false);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(13, 13, 13, 13));
         
         // Button panel with glow border
         JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 8, 8));
         buttonPanel.setBackground(new Color(0, 0, 0, 100));
         buttonPanel.setBorder(createGlowBorder(NEON_BLUE, 2));
         
-        NeonButton saveBtn = new NeonButton("💾 SAVE", NEON_GREEN, 12, new Dimension(100, 40));
+        NeonButton saveBtn = new NeonButton("💾 SAVE", NEON_GREEN, 12, new Dimension(130, 50));
         saveBtn.addActionListener(e -> saveGame());
         
-        NeonButton loadBtn = new NeonButton("📂 LOAD", NEON_YELLOW, 12, new Dimension(100, 40));
+        NeonButton loadBtn = new NeonButton("📂 LOAD", NEON_YELLOW, 12, new Dimension(130, 50));
         loadBtn.addActionListener(e -> showLoadGameDialog());
         
-        NeonButton hintBtn = new NeonButton("💡 HINT", NEON_PINK, 12, new Dimension(100, 40));
+        NeonButton hintBtn = new NeonButton("💡 HINT", NEON_PINK, 12, new Dimension(130, 50));
         hintBtn.addActionListener(e -> showHint());
         
-        NeonButton solveBtn = new NeonButton("🤖 SOLVE", NEON_ORANGE, 12, new Dimension(100, 40));
+        NeonButton solveBtn = new NeonButton("🤖 SOLVE", NEON_ORANGE, 12, new Dimension(130, 50));
         solveBtn.addActionListener(e -> solvePuzzle());
         
-        NeonButton clearBtn = new NeonButton("🗑 CLEAR", NEON_RED, 12, new Dimension(100, 40));
+        NeonButton clearBtn = new NeonButton("🗑 CLEAR", NEON_RED, 12, new Dimension(130, 50));
         clearBtn.addActionListener(e -> clearSelectedCell());
         
-        NeonButton newBtn = new NeonButton("🎮 NEW", NEON_CYAN, 12, new Dimension(100, 40));
+        NeonButton newBtn = new NeonButton("🎮 NEW", NEON_CYAN, 12, new Dimension(130, 50));
         newBtn.addActionListener(e -> cardLayout.show(mainPanel, DIFFICULTY_PANEL));
         
         buttonPanel.add(saveBtn);
@@ -614,7 +618,7 @@ public class SudokuGUI extends JFrame {
         
         for (int i = 1; i <= 9; i++) {
             final int num = i;
-            NeonButton numBtn = new NeonButton(String.valueOf(i), NEON_BLUE, 16, new Dimension(45, 45));
+            NeonButton numBtn = new NeonButton(String.valueOf(i), NEON_BLUE, 16, new Dimension(58, 58));
             numBtn.addActionListener(e -> insertNumber(num));
             numberPanel.add(numBtn);
         }
@@ -636,11 +640,11 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(39, 39, 39, 39));
         
         // Glowing title
         JLabel title = new JLabel("SELECT SAVE FILE");
-        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
+        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 31));
         title.setForeground(NEON_CYAN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setBorder(createGlowBorder(NEON_CYAN, 2));
@@ -651,12 +655,12 @@ public class SudokuGUI extends JFrame {
         
         if (saveFiles == null || saveFiles.length == 0) {
             JLabel noSaves = new JLabel("NO SAVED GAMES FOUND");
-            noSaves.setFont(new Font("Arial Unicode MS", Font.BOLD, 18));
+            noSaves.setFont(new Font("Arial Unicode MS", Font.BOLD, 23));
             noSaves.setForeground(NEON_RED);
             noSaves.setHorizontalAlignment(SwingConstants.CENTER);
             panel.add(noSaves, BorderLayout.CENTER);
             
-            NeonButton okBtn = new NeonButton("✗ OK", NEON_RED, 14, new Dimension(120, 45));
+            NeonButton okBtn = new NeonButton("✗ OK", NEON_RED, 14, new Dimension(156, 60));
             okBtn.addActionListener(e -> dialog.dispose());
             JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             btnPanel.setBackground(BLACK_BG);
@@ -669,7 +673,7 @@ public class SudokuGUI extends JFrame {
             }
             
             JList<String> list = new JList<>(names);
-            list.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
+            list.setFont(new Font("Arial Unicode MS", Font.BOLD, 21));
             list.setBackground(DARK_BG);
             list.setForeground(NEON_YELLOW);
             list.setSelectionBackground(NEON_MAGENTA);
@@ -685,7 +689,7 @@ public class SudokuGUI extends JFrame {
             JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
             btnPanel.setBackground(BLACK_BG);
             
-            NeonButton loadBtn = new NeonButton("📂 LOAD", NEON_GREEN, 14, new Dimension(120, 45));
+            NeonButton loadBtn = new NeonButton("📂 LOAD", NEON_GREEN, 14, new Dimension(156, 60));
             loadBtn.addActionListener(e -> {
                 String selected = list.getSelectedValue();
                 if (selected != null) {
@@ -712,7 +716,7 @@ public class SudokuGUI extends JFrame {
                 }
             });
             
-            NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(120, 45));
+            NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(156, 60));
             cancelBtn.addActionListener(e -> dialog.dispose());
             
             btnPanel.add(loadBtn);
@@ -734,10 +738,10 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(39, 39, 39, 39));
         
         JLabel title = new JLabel("⚙ CUSTOM DIFFICULTY ⚙");
-        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
+        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 31));
         title.setForeground(NEON_PINK);
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setBorder(createGlowBorder(NEON_PINK, 2));
@@ -747,12 +751,12 @@ public class SudokuGUI extends JFrame {
         inputPanel.setBackground(BLACK_BG);
         
         JLabel label = new JLabel("EMPTY CELLS (1-80):");
-        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
+        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 21));
         label.setForeground(NEON_YELLOW);
         inputPanel.add(label, BorderLayout.NORTH);
         
         JTextField field = new JTextField("45", 10);
-        field.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
+        field.setFont(new Font("Arial Unicode MS", Font.BOLD, 31));
         field.setBackground(DARK_BG);
         field.setForeground(NEON_CYAN);
         field.setCaretColor(NEON_CYAN);
@@ -765,7 +769,7 @@ public class SudokuGUI extends JFrame {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(BLACK_BG);
         
-        NeonButton okBtn = new NeonButton("✓ OK", NEON_GREEN, 14, new Dimension(100, 45));
+        NeonButton okBtn = new NeonButton("✓ OK", NEON_GREEN, 14, new Dimension(130, 60));
         okBtn.addActionListener(e -> {
             try {
                 int empty = Integer.parseInt(field.getText().trim());
@@ -782,7 +786,7 @@ public class SudokuGUI extends JFrame {
             }
         });
         
-        NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(100, 45));
+        NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(130, 60));
         cancelBtn.addActionListener(e -> dialog.dispose());
         
         btnPanel.add(okBtn);
@@ -834,7 +838,7 @@ public class SudokuGUI extends JFrame {
                 if (fixed[row][col] && value != 0) {
                     cell.setBackground(new Color(20, 20, 30));
                     cell.setForeground(NEON_CYAN);
-                    cell.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
+                    cell.setFont(new Font("Arial Unicode MS", Font.BOLD, 31));
                     cell.setEditable(false);
                     cell.setBorder(BorderFactory.createLineBorder(NEON_CYAN, 2));
                 } else {
@@ -957,10 +961,10 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(39, 39, 39, 39));
         
         JLabel title = new JLabel("💾 SAVE GAME 💾");
-        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 24));
+        title.setFont(new Font("Arial Unicode MS", Font.BOLD, 31));
         title.setForeground(NEON_GREEN);
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setBorder(createGlowBorder(NEON_GREEN, 2));
@@ -970,12 +974,12 @@ public class SudokuGUI extends JFrame {
         inputPanel.setBackground(BLACK_BG);
         
         JLabel label = new JLabel("SAVE NAME:");
-        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
+        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 21));
         label.setForeground(NEON_CYAN);
         inputPanel.add(label, BorderLayout.NORTH);
         
         JTextField field = new JTextField("sudoku_save", 15);
-        field.setFont(new Font("Arial Unicode MS", Font.BOLD, 18));
+        field.setFont(new Font("Arial Unicode MS", Font.BOLD, 23));
         field.setBackground(DARK_BG);
         field.setForeground(NEON_GREEN);
         field.setCaretColor(NEON_GREEN);
@@ -987,7 +991,7 @@ public class SudokuGUI extends JFrame {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(BLACK_BG);
         
-        NeonButton okBtn = new NeonButton("✓ SAVE", NEON_GREEN, 14, new Dimension(100, 45));
+        NeonButton okBtn = new NeonButton("✓ SAVE", NEON_GREEN, 14, new Dimension(130, 60));
         okBtn.addActionListener(e -> {
             String filename = field.getText().trim();
             if (!filename.isEmpty()) {
@@ -1007,7 +1011,7 @@ public class SudokuGUI extends JFrame {
             }
         });
         
-        NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(100, 45));
+        NeonButton cancelBtn = new NeonButton("✗ CANCEL", NEON_RED, 14, new Dimension(130, 60));
         cancelBtn.addActionListener(e -> dialog.dispose());
         
         btnPanel.add(okBtn);
@@ -1028,15 +1032,15 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(39, 39, 39, 39));
         
         JLabel label = new JLabel(message);
-        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
+        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 21));
         label.setForeground(NEON_RED);
         label.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(label, BorderLayout.CENTER);
         
-        NeonButton okBtn = new NeonButton("✗ OK", NEON_RED, 14, new Dimension(100, 45));
+        NeonButton okBtn = new NeonButton("✗ OK", NEON_RED, 14, new Dimension(130, 60));
         okBtn.addActionListener(e -> dialog.dispose());
         
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -1071,15 +1075,15 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(39, 39, 39, 39));
         
         JLabel label = new JLabel(message);
-        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 16));
+        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 21));
         label.setForeground(NEON_CYAN);
         label.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(label, BorderLayout.CENTER);
         
-        NeonButton okBtn = new NeonButton("✓ OK", NEON_GREEN, 14, new Dimension(100, 45));
+        NeonButton okBtn = new NeonButton("✓ OK", NEON_GREEN, 14, new Dimension(130, 60));
         okBtn.addActionListener(e -> dialog.dispose());
         
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -1103,10 +1107,10 @@ public class SudokuGUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(39, 39, 39, 39));
         
         JLabel label = new JLabel("AUTO-SOLVE THE PUZZLE?");
-        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 18));
+        label.setFont(new Font("Arial Unicode MS", Font.BOLD, 23));
         label.setForeground(NEON_ORANGE);
         label.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(label, BorderLayout.CENTER);
@@ -1114,7 +1118,7 @@ public class SudokuGUI extends JFrame {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.setBackground(BLACK_BG);
         
-        NeonButton yesBtn = new NeonButton("✓ YES", NEON_GREEN, 14, new Dimension(100, 45));
+        NeonButton yesBtn = new NeonButton("✓ YES", NEON_GREEN, 14, new Dimension(130, 60));
         yesBtn.addActionListener(e -> {
             game.solve();
             updateGridDisplay();
@@ -1123,7 +1127,7 @@ public class SudokuGUI extends JFrame {
             checkWin();
         });
         
-        NeonButton noBtn = new NeonButton("✗ NO", NEON_RED, 14, new Dimension(100, 45));
+        NeonButton noBtn = new NeonButton("✗ NO", NEON_RED, 14, new Dimension(130, 60));
         noBtn.addActionListener(e -> dialog.dispose());
         
         btnPanel.add(yesBtn);
@@ -1149,7 +1153,7 @@ public class SudokuGUI extends JFrame {
             JPanel panel = new JPanel(new BorderLayout(20, 20));
             panel.setBackground(new Color(0, 0, 0, 0));
         panel.setOpaque(false);
-            panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+            panel.setBorder(BorderFactory.createEmptyBorder(52, 52, 52, 52));
             
             JTextArea text = new JTextArea(
                 "🎉🎉🎉 CONGRATULATIONS! 🎉🎉🎉\n\n" +
@@ -1157,7 +1161,7 @@ public class SudokuGUI extends JFrame {
                 "TIME: " + formatTime(total) + "\n" +
                 "DIFFICULTY: " + difficulty
             );
-            text.setFont(new Font("Arial Unicode MS", Font.BOLD, 18));
+            text.setFont(new Font("Arial Unicode MS", Font.BOLD, 23));
             text.setBackground(BLACK_BG);
             text.setForeground(NEON_GREEN);
             text.setEditable(false);
@@ -1168,13 +1172,13 @@ public class SudokuGUI extends JFrame {
             JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
             btnPanel.setBackground(BLACK_BG);
             
-            NeonButton newBtn = new NeonButton("🎮 NEW GAME", NEON_CYAN, 14, new Dimension(150, 45));
+            NeonButton newBtn = new NeonButton("🎮 NEW GAME", NEON_CYAN, 14, new Dimension(195, 60));
             newBtn.addActionListener(e -> {
                 dialog.dispose();
                 cardLayout.show(mainPanel, DIFFICULTY_PANEL);
             });
             
-            NeonButton menuBtn = new NeonButton("🏠 MENU", NEON_BLUE, 14, new Dimension(120, 45));
+            NeonButton menuBtn = new NeonButton("🏠 MENU", NEON_BLUE, 14, new Dimension(156, 60));
             menuBtn.addActionListener(e -> {
                 dialog.dispose();
                 cardLayout.show(mainPanel, MENU_PANEL);
