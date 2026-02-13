@@ -5,6 +5,7 @@ target/
 # IDE files
 .vscode/
 .idea/
+.metals/
 *.iml
 *.ipr
 *.iws
