@@ -185,8 +185,8 @@ public class SudokuGUI extends JFrame {
         // Exit application when window is closed
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        // Allow window resizing and fullscreen
-        setResizable(true);
+        // Don't allow window resizing and fullscreen
+        setResizable(false);
 
         // Enable macOS native fullscreen (green traffic-light button)
         getRootPane().putClientProperty("apple.awt.fullscreenable", Boolean.TRUE);
