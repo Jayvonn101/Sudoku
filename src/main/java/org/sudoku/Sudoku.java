@@ -1,51 +1,54 @@
-package Game_Generator;
+package org.sudoku;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Sodoku {
+public class Sudoku implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int row;
     private int col;
     private int[][] grid;
+    private int[][] solution;
+    private boolean[][] fixedCells;
 
-    public Sodoku(int rows, int cols) {
+    public Sudoku(int rows, int cols) {
         if (rows <= 0 || cols <= 0) {
             throw new IllegalArgumentException("Rows and columns must be greater than zero.");
         }
         if (rows != cols) {
-            throw new IllegalArgumentException("Sodoku grid must be square (same number of rows and columns).");
+            throw new IllegalArgumentException("Sudoku grid must be square (same number of rows and columns).");
         }
         this.row = rows;
         this.col = cols;
         this.grid = new int[rows][cols];
+        this.solution = new int[rows][cols];
+        this.fixedCells = new boolean[rows][cols];
     }
 
-    public int getRow() {
-        return row;
-    }
-
-    public int getCol() {
-        return col;
-    }
+    public int getRow() { return row; }
+    public int getCol() { return col; }
+    public int[][] getGrid() { return grid; }
+    public void setGrid(int[][] grid) { this.grid = grid; }
+    public boolean[][] getFixedCells() { return fixedCells; }
+    public void setFixedCells(boolean[][] fixed) { this.fixedCells = fixed; }
 
     public void fillNums() {
         fillWithBacktracking();
+        for (int i = 0; i < row; i++) {
+            System.arraycopy(grid[i], 0, solution[i], 0, col);
+        }
     }
 
     private boolean fillWithBacktracking() {
         int[] cell = findEmptyCell();
-        if (cell == null) {
-            return true;
-        }
-        int i = cell[0];
-        int j = cell[1];
+        if (cell == null) return true;
+        int i = cell[0], j = cell[1];
 
         int[] nums = shuffledNumbers();
         for (int num : nums) {
             if (isValid(i, j, num)) {
                 grid[i][j] = num;
-                if (fillWithBacktracking()) {
-                    return true;
-                }
+                if (fillWithBacktracking()) return true;
                 grid[i][j] = 0;
             }
         }
@@ -76,6 +79,7 @@ public class Sodoku {
             int c = rand.nextInt(col);
             if (grid[r][c] != 0) {
                 grid[r][c] = 0;
+                fixedCells[r][c] = true;
                 placed++;
             }
         }
@@ -86,8 +90,8 @@ public class Sodoku {
             System.out.println("Cell is out of bounds.");
             return false;
         }
-        if (grid[r][c] != 0) {
-            System.out.println("Cell is already occupied.");
+        if (fixedCells[r][c]) {
+            System.out.println("Cannot modify this cell - it's part of the puzzle.");
             return false;
         }
         if (num < 1 || num > row) {
@@ -102,24 +106,39 @@ public class Sodoku {
         return true;
     }
 
+    public boolean removeNum(int r, int c) {
+        if (r < 0 || r >= row || c < 0 || c >= col) {
+            System.out.println("Cell is out of bounds.");
+            return false;
+        }
+        if (fixedCells[r][c]) {
+            System.out.println("Cannot remove this cell - it's part of the puzzle.");
+            return false;
+        }
+        grid[r][c] = 0;
+        return true;
+    }
+
+    public Hint getHint() {
+        int[] cell = findEmptyCell();
+        if (cell == null) return null;
+        int r = cell[0], c = cell[1];
+        return new Hint(r, c, solution[r][c]);
+    }
+
     public boolean isSolved() {
         return findEmptyCell() == null;
     }
 
     public boolean solve() {
         int[] cell = findEmptyCell();
-        if (cell == null) {
-            return true;
-        }
-        int i = cell[0];
-        int j = cell[1];
+        if (cell == null) return true;
+        int i = cell[0], j = cell[1];
 
         for (int num = 1; num <= 9; num++) {
             if (isValid(i, j, num)) {
                 grid[i][j] = num;
-                if (solve()) {
-                    return true;
-                }
+                if (solve()) return true;
                 grid[i][j] = 0;
             }
         }
@@ -129,23 +148,19 @@ public class Sodoku {
     private int[] findEmptyCell() {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                if (grid[i][j] == 0) {
-                    return new int[]{i, j};
-                }
+                if (grid[i][j] == 0) return new int[]{i, j};
             }
         }
         return null;
     }
 
-    private boolean isValid(int r, int c, int num) {
+    public boolean isValid(int r, int c, int num) {
         for (int j = 0; j < col; j++) {
             if (grid[r][j] == num) return false;
         }
-
         for (int i = 0; i < row; i++) {
             if (grid[i][c] == num) return false;
         }
-
         int boxSize = (int) Math.sqrt(row);
         int boxRow = (r / boxSize) * boxSize;
         int boxCol = (c / boxSize) * boxSize;
@@ -154,16 +169,51 @@ public class Sodoku {
                 if (grid[i][j] == num) return false;
             }
         }
-
         return true;
     }
 
     public void printGrid() {
-        for (int[] gridRow : grid) {
-            for (int num : gridRow) {
-                System.out.print((num == 0 ? "." : num) + " ");
+        System.out.println();
+        System.out.print("    ");
+        for (int j = 0; j < col; j++) {
+            System.out.print((j + 1) + " ");
+            if ((j + 1) % 3 == 0 && j < col - 1) System.out.print("| ");
+        }
+        System.out.println();
+        System.out.print("   ");
+        for (int j = 0; j < col * 2 + 5; j++) System.out.print("-");
+        System.out.println();
+
+        for (int i = 0; i < row; i++) {
+            System.out.print((i + 1) + " | ");
+            for (int j = 0; j < col; j++) {
+                String cell = grid[i][j] == 0 ? "." : String.valueOf(grid[i][j]);
+                if (fixedCells[i][j] && grid[i][j] != 0) {
+                    System.out.print("[" + cell + "]");
+                } else {
+                    System.out.print(" " + cell + " ");
+                }
+                if ((j + 1) % 3 == 0 && j < col - 1) System.out.print("|");
             }
             System.out.println();
+            if ((i + 1) % 3 == 0 && i < row - 1) {
+                System.out.print("   ");
+                for (int j = 0; j < col * 2 + 5; j++) System.out.print("-");
+                System.out.println();
+            }
+        }
+        System.out.println();
+    }
+
+    public static class Hint {
+        public final int row;
+        public final int col;
+        public final int value;
+        
+        public Hint(int row, int col, int value) {
+            this.row = row;
+            this.col = col;
+            this.value = value;
         }
     }
 }
