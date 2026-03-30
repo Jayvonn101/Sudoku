@@ -182,8 +182,23 @@ public class SudokuGUI extends JFrame {
         // Exit application when window is closed
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        // Prevent window resizing (fixed size for consistent layout)
-        setResizable(false);
+        // Allow window resizing and fullscreen
+        setResizable(true);
+
+        // Toggle fullscreen with F11
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "toggleFullscreen");
+        getRootPane().getActionMap().put("toggleFullscreen", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+                if (device.getFullScreenWindow() == SudokuGUI.this) {
+                    device.setFullScreenWindow(null);
+                } else {
+                    device.setFullScreenWindow(SudokuGUI.this);
+                }
+            }
+        });
         
         // Create save directory if it doesn't exist
         new File(SAVE_DIR).mkdirs();
