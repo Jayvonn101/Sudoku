@@ -1,7 +1,7 @@
 package org.sudoku;
 
-import java.util.Random;
 import java.io.Serializable;
+import java.util.Random;
 
 public class Sudoku implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -57,7 +57,8 @@ public class Sudoku implements Serializable {
 
     private int[] shuffledNumbers() {
         Random rand = new Random();
-        int[] nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        int[] nums = new int[row];
+        for (int i = 0; i < row; i++) nums[i] = i + 1;
         for (int k = nums.length - 1; k > 0; k--) {
             int swap = rand.nextInt(k + 1);
             int temp = nums[k];
@@ -93,8 +94,8 @@ public class Sudoku implements Serializable {
             System.out.println("Cannot modify this cell - it's part of the puzzle.");
             return false;
         }
-        if (num < 1 || num > 9) {
-            System.out.println("Number must be between 1 and 9.");
+        if (num < 1 || num > row) {
+            System.out.println("Number must be between 1 and " + row + ".");
             return false;
         }
         if (!isValid(r, c, num)) {
@@ -160,10 +161,11 @@ public class Sudoku implements Serializable {
         for (int i = 0; i < row; i++) {
             if (grid[i][c] == num) return false;
         }
-        int boxRow = (r / 3) * 3;
-        int boxCol = (c / 3) * 3;
-        for (int i = boxRow; i < boxRow + 3; i++) {
-            for (int j = boxCol; j < boxCol + 3; j++) {
+        int boxSize = (int) Math.sqrt(row);
+        int boxRow = (r / boxSize) * boxSize;
+        int boxCol = (c / boxSize) * boxSize;
+        for (int i = boxRow; i < boxRow + boxSize; i++) {
+            for (int j = boxCol; j < boxCol + boxSize; j++) {
                 if (grid[i][j] == num) return false;
             }
         }
