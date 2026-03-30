@@ -12,15 +12,18 @@ A feature-rich Java-based Sudoku game with a stunning neon aesthetic, animated b
 ```
 Sodoku/
 ├── src/
-│   └── main/
-│       └── java/
-│           └── org/
-│               └── sudoku/
-│                   ├── Main.java              # 🖥️ Console entry point
-│                   ├── Sudoku.java            # 🧩 Sudoku logic and solver
-│                   ├── SudokuGUI.java         # 🎨 Swing GUI interface (heavily commented)
-│                   ├── GameState.java         # 💾 Save/load functionality
-│                   └── DotAnimationPanel.java # ✨ Animated background
+│   ├── main/
+│   │   └── java/
+│   │       └── org/
+│   │           └── sudoku/
+│   │               ├── Main.java              # 🖥️ Console entry point
+│   │               ├── Sudoku.java            # 🧩 Sudoku logic and solver
+│   │               ├── SudokuGUI.java         # 🎨 Swing GUI interface (heavily commented)
+│   │               ├── GameState.java         # 💾 Save/load functionality
+│   │               └── DotAnimationPanel.java # ✨ Animated background
+│   └── tests/
+│       └── Game_Generator/
+│           └── SodokuTest.java                # 🧪 JUnit test suite
 ├── scripts/
 │   ├── build.bat       # 🔨 Windows build script
 │   ├── build.sh        # 🔨 Unix build script
@@ -28,9 +31,12 @@ Sodoku/
 │   ├── run.sh          # ▶️ Unix console runner
 │   ├── run-gui.bat     # 🎮 Windows GUI runner
 │   └── run-gui.sh      # 🎮 Unix GUI runner
+├── lib/
+│   └── junit-platform-console-standalone-1.11.4.jar  # 🧪 JUnit test runner
 ├── target/
 │   └── classes/        # 📦 Compiled class files
 ├── saves/              # 💾 Saved games directory (gitignored)
+├── test.sh             # 🧪 Unix test runner script
 └── README.md           # 📖 This file
 ```
 
@@ -47,6 +53,18 @@ scripts\build.bat
 ```bash
 ./scripts/build.sh
 ```
+
+---
+
+## 🧪 Testing
+
+Run the JUnit test suite to verify core Sudoku logic:
+
+```bash
+./test.sh
+```
+
+> Requires `lib/junit-platform-console-standalone-1.11.4.jar` (included in repo).
 
 ---
 
