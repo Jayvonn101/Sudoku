@@ -79,8 +79,12 @@ public class Sudoku implements Serializable {
             int c = rand.nextInt(col);
             if (grid[r][c] != 0) {
                 grid[r][c] = 0;
-                fixedCells[r][c] = true;
                 placed++;
+            }
+        }
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                fixedCells[i][j] = grid[i][j] != 0;
             }
         }
     }
