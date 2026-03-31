@@ -6,7 +6,7 @@
 
 ---
 
-## Sodoku.java Tests
+## Sudoku.java Tests
 
 ### Constructor
 - [ ] Valid 9x9 dimensions initializes a zeroed grid

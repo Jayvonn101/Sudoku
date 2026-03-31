@@ -10,7 +10,7 @@ A feature-rich Java-based Sudoku game with a stunning neon aesthetic, animated b
 ## 📁 Project Structure
 
 ```
-Sodoku/
+Sudoku/
 ├── src/
 │   ├── main/
 │   │   └── java/
