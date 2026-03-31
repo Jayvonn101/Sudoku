@@ -16,10 +16,14 @@ Sudoku/
 │   │   └── java/
 │   │       └── org/
 │   │           └── sudoku/
-│   │               ├── Main.java              # 🖥️ Console entry point
-│   │               ├── Sudoku.java            # 🧩 Sudoku logic and solver
-│   │               ├── SudokuGUI.java         # 🎨 Swing GUI interface (heavily commented)
-│   │               └── GameState.java         # 💾 Save/load functionality
+│   │               ├── Main.java                  # 🖥️ Console entry point
+│   │               ├── Sudoku.java                # 🧩 Sudoku logic and solver
+│   │               ├── SudokuGUI.java             # 🎨 Swing GUI interface (heavily commented)
+│   │               ├── GameState.java             # 💾 Save/load functionality
+│   │               ├── SudokuApplication.java     # 🚀 Spring Boot entry point
+│   │               ├── SudokuController.java      # 🌐 REST API controller
+│   │               ├── GameSession.java           # 🎮 In-memory game session (API)
+│   │               └── GameStore.java             # 🗄️ Session storage for API games
 │   └── test/
 │       └── java/
 │           └── org/
@@ -189,6 +193,47 @@ java -cp target\sudoku-1.0-SNAPSHOT.jar org.sudoku.Main
 :: or use the provided script
 scripts\run.bat
 ```
+
+---
+
+## 🌐 REST API
+
+The project includes a Spring Boot REST API so other applications can integrate with the Sudoku engine without using the GUI or console.
+
+### 🚀 Running the API Server
+
+```bash
+mvn spring-boot:run
+```
+
+The server starts on `http://localhost:8080` by default.
+
+### 📡 Endpoints
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| `POST` | `/api/game/new?difficulty={easy\|medium\|hard}` | Create a new game, returns a game `id` |
+| `GET` | `/api/game/{id}` | Get the current board, difficulty, and elapsed time |
+| `POST` | `/api/game/{id}/move?row={r}&col={c}&num={n}` | Place a number (1-indexed) |
+| `DELETE` | `/api/game/{id}/move?row={r}&col={c}` | Remove a number from a cell |
+| `GET` | `/api/game/{id}/hint` | Get a suggested next move |
+| `GET` | `/api/game/{id}/solve` | Auto-solve the puzzle |
+
+### 📝 Example
+
+```bash
+# Start a new hard game
+curl -X POST "http://localhost:8080/api/game/new?difficulty=hard"
+# {"id":"<uuid>","difficulty":"hard"}
+
+# Get the board
+curl "http://localhost:8080/api/game/<uuid>"
+
+# Place number 5 at row 1, col 3
+curl -X POST "http://localhost:8080/api/game/<uuid>/move?row=1&col=3&num=5"
+```
+
+> **Note:** Games are stored in memory only — they are lost when the server restarts.
 
 ---
 
